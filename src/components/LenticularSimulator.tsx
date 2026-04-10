@@ -152,8 +152,8 @@ export default function LenticularSimulator({ images, lpi }: Props) {
   if (images.length < 2) return null;
 
   return (
-    <div className="flex flex-col gap-2">
-      <div className="flex items-center gap-3">
+    <div className="flex flex-col gap-2 h-full">
+      <div className="flex items-center gap-3 shrink-0">
         <span className="text-xs text-text-tertiary uppercase tracking-wider font-medium">
           3D Simulation
         </span>
@@ -167,7 +167,8 @@ export default function LenticularSimulator({ images, lpi }: Props) {
         onPointerMove={handlePointerMove}
         onPointerUp={handlePointerUp}
         onPointerLeave={handlePointerUp}
-        className="w-full h-[280px] sm:h-[400px] rounded-xl border border-border bg-surface-overlay overflow-hidden
+        className="w-full h-[280px] sm:h-[400px] lg:h-auto lg:flex-1 min-h-0
+          rounded-xl border border-border bg-surface-overlay overflow-hidden
           cursor-grab active:cursor-grabbing touch-none select-none"
       >
         <Canvas

@@ -33,6 +33,24 @@ export function loadImageFromFile(file: File): Promise<LoadedImage> {
   });
 }
 
+export function loadImageFromUrl(url: string, name: string): Promise<LoadedImage> {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.onload = () => {
+      resolve({
+        id: generateId(),
+        name,
+        element: img,
+        width: img.naturalWidth,
+        height: img.naturalHeight,
+        objectUrl: url,
+      });
+    };
+    img.onerror = () => reject(new Error(`Failed to load image: ${name}`));
+    img.src = url;
+  });
+}
+
 /**
  * Extract ImageData from a loaded image, optionally resizing to target dimensions.
  * Uses center-crop when aspect ratios differ.
