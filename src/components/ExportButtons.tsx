@@ -29,7 +29,7 @@ export default function ExportButtons({ imageData, dpi, lpi, frameCount }: Props
   };
 
   return (
-    <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 max-w-md">
+    <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 sm:max-w-md">
       <button
         onClick={() => handleExport('png')}
         className="h-10 px-5 rounded-lg font-medium text-sm

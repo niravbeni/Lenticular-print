@@ -78,7 +78,7 @@ export default function InterlacePreview({
 
   if (!imageData) {
     return (
-      <div className="flex-1 flex items-center justify-center rounded-xl border border-dashed border-border">
+      <div className="h-full flex items-center justify-center rounded-xl border border-dashed border-border">
         <p className="text-text-tertiary text-sm text-center px-4">
           Upload at least 2 images, set LPI & DPI, then hit Generate
         </p>
@@ -89,7 +89,7 @@ export default function InterlacePreview({
   const displayScale = fitScale * zoom;
 
   return (
-    <div className="flex-1 flex flex-col min-h-0">
+    <div className="h-full flex flex-col min-h-0">
       {/* Toolbar */}
       <div className="flex items-center gap-2 sm:gap-3 mb-2 flex-wrap">
         <span className="text-xs text-text-tertiary font-mono">

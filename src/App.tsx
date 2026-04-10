@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react';
+import { lazy, Suspense, useCallback, useRef, useState } from 'react';
 import ImageUploader from './components/ImageUploader';
 import SettingsPanel from './components/SettingsPanel';
 import InterlacePreview from './components/InterlacePreview';
@@ -6,6 +6,10 @@ import ExportButtons from './components/ExportButtons';
 import type { LoadedImage } from './lib/imageUtils';
 import { getImageData } from './lib/imageUtils';
 import { interlace } from './lib/interlace';
+
+const LenticularSimulator = lazy(
+  () => import('./components/LenticularSimulator')
+);
 
 export default function App() {
   const [images, setImages] = useState<LoadedImage[]>([]);
@@ -16,6 +20,7 @@ export default function App() {
     stripWidth: number;
   } | null>(null);
   const [processing, setProcessing] = useState(false);
+  const generateId = useRef(0);
 
   const targetWidth = images.length > 0 ? images[0].width : null;
   const targetHeight = images.length > 0 ? images[0].height : null;
@@ -24,8 +29,12 @@ export default function App() {
   const handleGenerate = useCallback(() => {
     if (!canGenerate || !targetWidth || !targetHeight) return;
 
+    const id = ++generateId.current;
     setProcessing(true);
-    requestAnimationFrame(() => {
+    setResult(null);
+
+    setTimeout(() => {
+      if (id !== generateId.current) return;
       try {
         const imageDatas = images.map((img) =>
           getImageData(img, targetWidth, targetHeight)
@@ -34,11 +43,9 @@ export default function App() {
         setResult({ imageData: r.imageData, stripWidth: r.stripWidth });
       } catch (e) {
         console.error('Interlace error:', e);
-        setResult(null);
-      } finally {
-        setProcessing(false);
       }
-    });
+      setProcessing(false);
+    }, 16);
   }, [canGenerate, images, targetWidth, targetHeight, lpi, dpi]);
 
   const handleImagesChange = useCallback((newImages: LoadedImage[]) => {
@@ -47,19 +54,19 @@ export default function App() {
   }, []);
 
   return (
-    <div className="min-h-[100dvh] flex flex-col bg-surface text-text-primary">
+    <div className="min-h-[100dvh] bg-surface text-text-primary">
       {/* Header */}
-      <header className="px-4 sm:px-6 py-3 border-b border-border shrink-0">
+      <header className="px-4 sm:px-6 py-3 border-b border-border">
         <h1 className="text-base sm:text-lg font-semibold tracking-tight">
           Lenticular Print Generator
         </h1>
       </header>
 
       {/* Controls */}
-      <section className="px-4 sm:px-6 py-4 border-b border-border space-y-4 shrink-0">
+      <section className="px-4 sm:px-6 py-4 border-b border-border space-y-3">
         <ImageUploader images={images} onImagesChange={handleImagesChange} />
 
-        <div className="flex flex-wrap items-end gap-3">
+        <div className="flex flex-col sm:flex-row sm:items-end gap-3">
           <SettingsPanel
             lpi={lpi}
             dpi={dpi}
@@ -72,7 +79,7 @@ export default function App() {
           <button
             disabled={!canGenerate || processing}
             onClick={handleGenerate}
-            className="h-10 px-6 rounded-lg font-medium text-sm w-full sm:w-auto
+            className="h-10 px-6 rounded-lg font-medium text-sm
               whitespace-nowrap transition-colors duration-150
               bg-accent text-white hover:bg-accent-hover
               disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-accent"
@@ -82,23 +89,34 @@ export default function App() {
         </div>
       </section>
 
-      {/* Preview + Export */}
-      <main className="flex-1 flex flex-col p-4 sm:p-6 min-h-0">
-        <InterlacePreview
-          imageData={result?.imageData ?? null}
-          stripWidth={result?.stripWidth ?? 0}
-          frameCount={images.length}
-        />
+      {/* Preview + Simulation + Export */}
+      <main className="p-4 sm:p-6 space-y-4">
+        <div className="h-[35vh] sm:h-[min(50vh,500px)]">
+          <InterlacePreview
+            imageData={result?.imageData ?? null}
+            stripWidth={result?.stripWidth ?? 0}
+            frameCount={images.length}
+          />
+        </div>
 
         {result && (
-          <div className="pt-4 shrink-0">
+          <>
             <ExportButtons
               imageData={result.imageData}
               dpi={dpi}
               lpi={lpi}
               frameCount={images.length}
             />
-          </div>
+            <Suspense
+              fallback={
+                <div className="h-[280px] sm:h-[400px] rounded-xl border border-border bg-surface-overlay flex items-center justify-center text-text-tertiary text-sm">
+                  Loading 3D simulation...
+                </div>
+              }
+            >
+              <LenticularSimulator images={images} lpi={lpi} />
+            </Suspense>
+          </>
         )}
       </main>
     </div>

@@ -146,7 +146,7 @@ export default function ImageUploader({ images, onImagesChange }: Props) {
               }}
               className="absolute top-0 right-0 w-5 h-5 rounded-bl-md bg-black/70
                 text-text-secondary hover:text-danger text-xs
-                opacity-0 group-hover:opacity-100 transition-opacity
+                sm:opacity-0 sm:group-hover:opacity-100 transition-opacity
                 flex items-center justify-center"
             >
               &times;
