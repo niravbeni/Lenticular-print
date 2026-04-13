@@ -18,7 +18,7 @@ const DEFAULT_IMAGES = [
 
 export default function App() {
   const [images, setImages] = useState<LoadedImage[]>([]);
-  const [lpi, setLpi] = useState(40);
+  const [lpi, setLpi] = useState(50.24);
   const [dpi, setDpi] = useState(600);
   const [result, setResult] = useState<{
     imageData: ImageData;

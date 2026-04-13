@@ -8,7 +8,7 @@ interface Props {
   onDpiChange: (v: number) => void;
 }
 
-const LPI_PRESETS = [15, 20, 40, 50, 60, 75, 100];
+const LPI_PRESETS = [15, 20, 40, 50, 50.24, 60, 75, 100];
 const DPI_PRESETS = [300, 600, 720, 1200, 1440];
 
 function InlineSelect({
@@ -48,13 +48,14 @@ function InlineSelect({
         {!isPreset && (
           <input
             type="number"
-            min={1}
+            min={0.1}
+            step="any"
             value={value}
             onChange={(e) => {
-              const v = parseInt(e.target.value, 10);
-              if (v > 0) onChange(v);
+              const v = parseFloat(e.target.value);
+              if (v > 0 && Number.isFinite(v)) onChange(v);
             }}
-            className="h-10 w-20 bg-surface-overlay border border-border rounded-lg px-3
+            className="h-10 w-24 bg-surface-overlay border border-border rounded-lg px-3
               text-sm text-text-primary focus:outline-none focus:border-accent"
           />
         )}
