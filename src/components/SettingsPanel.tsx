@@ -1,15 +1,24 @@
 interface Props {
   lpi: number;
   dpi: number;
+  printWidth: number;
+  printHeight: number;
   frameCount: number;
-  imageWidth: number | null;
-  imageHeight: number | null;
   onLpiChange: (v: number) => void;
   onDpiChange: (v: number) => void;
+  onPrintWidthChange: (v: number) => void;
+  onPrintHeightChange: (v: number) => void;
 }
 
 const LPI_PRESETS = [15, 20, 40, 50, 50.24, 60, 75, 100];
 const DPI_PRESETS = [300, 600, 720, 1200, 1440];
+const SIZE_PRESETS: { label: string; w: number; h: number }[] = [
+  { label: '4×6', w: 4, h: 6 },
+  { label: '5×7', w: 5, h: 7 },
+  { label: '6×8', w: 6, h: 8 },
+  { label: '6×9', w: 6, h: 9 },
+  { label: '8×10', w: 8, h: 10 },
+];
 
 function InlineSelect({
   label,
@@ -64,22 +73,100 @@ function InlineSelect({
   );
 }
 
+function SizeSelect({
+  printWidth,
+  printHeight,
+  onWidthChange,
+  onHeightChange,
+}: {
+  printWidth: number;
+  printHeight: number;
+  onWidthChange: (v: number) => void;
+  onHeightChange: (v: number) => void;
+}) {
+  const matchedPreset = SIZE_PRESETS.find(
+    (p) => p.w === printWidth && p.h === printHeight
+  );
+
+  return (
+    <div className="flex flex-col gap-1 min-w-0">
+      <label className="text-xs text-text-tertiary">Size (in)</label>
+      <div className="flex gap-1.5">
+        <select
+          value={matchedPreset ? `${matchedPreset.w}x${matchedPreset.h}` : 'custom'}
+          onChange={(e) => {
+            const v = e.target.value;
+            if (v === 'custom') return;
+            const preset = SIZE_PRESETS.find((p) => `${p.w}x${p.h}` === v);
+            if (preset) {
+              onWidthChange(preset.w);
+              onHeightChange(preset.h);
+            }
+          }}
+          className="h-10 bg-surface-overlay border border-border rounded-lg px-3
+            text-sm text-text-primary focus:outline-none focus:border-accent
+            appearance-none cursor-pointer min-w-[5rem]"
+        >
+          {SIZE_PRESETS.map((p) => (
+            <option key={`${p.w}x${p.h}`} value={`${p.w}x${p.h}`}>
+              {p.label}
+            </option>
+          ))}
+          <option value="custom">Custom</option>
+        </select>
+        {!matchedPreset && (
+          <div className="flex items-center gap-1">
+            <input
+              type="number"
+              min={0.5}
+              step="any"
+              value={printWidth}
+              onChange={(e) => {
+                const v = parseFloat(e.target.value);
+                if (v > 0 && Number.isFinite(v)) onWidthChange(v);
+              }}
+              className="h-10 w-16 bg-surface-overlay border border-border rounded-lg px-2
+                text-sm text-text-primary focus:outline-none focus:border-accent text-center"
+            />
+            <span className="text-text-tertiary text-xs">×</span>
+            <input
+              type="number"
+              min={0.5}
+              step="any"
+              value={printHeight}
+              onChange={(e) => {
+                const v = parseFloat(e.target.value);
+                if (v > 0 && Number.isFinite(v)) onHeightChange(v);
+              }}
+              className="h-10 w-16 bg-surface-overlay border border-border rounded-lg px-2
+                text-sm text-text-primary focus:outline-none focus:border-accent text-center"
+            />
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
 export default function SettingsPanel({
   lpi,
   dpi,
+  printWidth,
+  printHeight,
   frameCount,
-  imageWidth,
-  imageHeight,
   onLpiChange,
   onDpiChange,
+  onPrintWidthChange,
+  onPrintHeightChange,
 }: Props) {
   const stripWidth = frameCount > 0 ? dpi / lpi / frameCount : 0;
   const lensPitch = dpi / lpi;
-  const printWidthInches = imageWidth ? imageWidth / dpi : null;
-  const printHeightInches = imageHeight ? imageHeight / dpi : null;
+  const outputWidth = Math.round(printWidth * dpi);
+  const outputHeight = Math.round(printHeight * dpi);
+
   return (
     <div className="flex flex-col gap-3 min-w-0">
-      <div className="flex gap-3">
+      <div className="flex flex-wrap gap-3">
         <InlineSelect
           label="LPI"
           value={lpi}
@@ -91,6 +178,12 @@ export default function SettingsPanel({
           value={dpi}
           presets={DPI_PRESETS}
           onChange={onDpiChange}
+        />
+        <SizeSelect
+          printWidth={printWidth}
+          printHeight={printHeight}
+          onWidthChange={onPrintWidthChange}
+          onHeightChange={onPrintHeightChange}
         />
       </div>
 
@@ -112,14 +205,12 @@ export default function SettingsPanel({
             Frames:{' '}
             <span className="text-text-secondary font-mono">{frameCount}</span>
           </span>
-          {printWidthInches !== null && printHeightInches !== null && (
-            <span>
-              Print:{' '}
-              <span className="text-text-secondary font-mono">
-                {printWidthInches.toFixed(1)}&times;{printHeightInches.toFixed(1)}&Prime;
-              </span>
+          <span>
+            Output:{' '}
+            <span className="text-text-secondary font-mono">
+              {outputWidth}&times;{outputHeight}px
             </span>
-          )}
+          </span>
         </div>
       )}
     </div>

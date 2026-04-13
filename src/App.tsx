@@ -20,6 +20,8 @@ export default function App() {
   const [images, setImages] = useState<LoadedImage[]>([]);
   const [lpi, setLpi] = useState(50.24);
   const [dpi, setDpi] = useState(600);
+  const [printWidth, setPrintWidth] = useState(4);
+  const [printHeight, setPrintHeight] = useState(6);
   const [result, setResult] = useState<{
     imageData: ImageData;
     stripWidth: number;
@@ -39,12 +41,12 @@ export default function App() {
       .catch((e) => console.warn('Could not load default images:', e));
   }, []);
 
-  const targetWidth = images.length > 0 ? images[0].width : null;
-  const targetHeight = images.length > 0 ? images[0].height : null;
+  const targetWidth = Math.round(printWidth * dpi);
+  const targetHeight = Math.round(printHeight * dpi);
   const canGenerate = images.length >= 2;
 
   const handleGenerate = useCallback(() => {
-    if (!canGenerate || !targetWidth || !targetHeight) return;
+    if (!canGenerate || targetWidth <= 0 || targetHeight <= 0) return;
 
     const id = ++generateId.current;
     setProcessing(true);
@@ -87,11 +89,13 @@ export default function App() {
           <SettingsPanel
             lpi={lpi}
             dpi={dpi}
+            printWidth={printWidth}
+            printHeight={printHeight}
             frameCount={images.length}
-            imageWidth={targetWidth}
-            imageHeight={targetHeight}
             onLpiChange={setLpi}
             onDpiChange={setDpi}
+            onPrintWidthChange={setPrintWidth}
+            onPrintHeightChange={setPrintHeight}
           />
           <button
             disabled={!canGenerate || processing}
