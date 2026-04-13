@@ -1,23 +1,33 @@
 import { changeDpiBlob } from 'changedpi';
 
-const OFFSETS = [-1.5, -1.0, -0.5, 0, 0.5, 1.0, 1.5];
-const BAND_HEIGHT_INCHES = 0.4;
+const LPI_STEP = 0.05;
+const HALF_RANGE = 0.30;
+const BAND_HEIGHT_INCHES = 0.35;
 const LABEL_HEIGHT = 20;
 
+function buildOffsets(): number[] {
+  const offsets: number[] = [];
+  for (let d = -HALF_RANGE; d <= HALF_RANGE + 1e-9; d += LPI_STEP) {
+    offsets.push(Math.round(d * 100) / 100);
+  }
+  return offsets;
+}
+
 /**
- * Generates a calibration strip with alternating black/white bands at several
- * slight LPI variations. Print this at actual size and hold your lenticular
- * sheet over it — the band that appears as a solid color (all black or all
- * white) reveals your true effective LPI for that printer.
+ * Generates a calibration strip with alternating black/white bands at fine
+ * LPI variations (0.05 LPI steps, ±0.30 LPI around center). Print at actual
+ * size and hold your lenticular sheet over it — the band that appears as a
+ * solid color (all black or all white) reveals your true effective LPI.
  */
 export function generateCalibrationStrip(
   dpi: number,
   lpi: number,
   printWidthInches: number
 ): ImageData {
+  const offsets = buildOffsets();
   const width = Math.round(printWidthInches * dpi);
   const bandPx = Math.round(BAND_HEIGHT_INCHES * dpi);
-  const totalHeight = OFFSETS.length * (bandPx + LABEL_HEIGHT);
+  const totalHeight = offsets.length * (bandPx + LABEL_HEIGHT);
 
   const canvas = document.createElement('canvas');
   canvas.width = width;
@@ -27,15 +37,17 @@ export function generateCalibrationStrip(
   ctx.fillStyle = '#ffffff';
   ctx.fillRect(0, 0, width, totalHeight);
 
-  OFFSETS.forEach((pct, i) => {
-    const adjustedLpi = lpi * (1 + pct / 100);
+  offsets.forEach((delta, i) => {
+    const adjustedLpi = lpi + delta;
     const pitch = dpi / adjustedLpi;
     const yStart = i * (bandPx + LABEL_HEIGHT);
 
-    ctx.fillStyle = '#1a1d27';
+    const isCenter = delta === 0;
+    ctx.fillStyle = isCenter ? '#0044cc' : '#1a1d27';
     ctx.font = `bold ${Math.min(14, LABEL_HEIGHT - 4)}px monospace`;
     ctx.textBaseline = 'top';
-    const label = `${adjustedLpi.toFixed(2)} LPI (${pct >= 0 ? '+' : ''}${pct.toFixed(1)}%)`;
+    const sign = delta >= 0 ? '+' : '';
+    const label = `${adjustedLpi.toFixed(2)} LPI (${sign}${delta.toFixed(2)})${isCenter ? '  ◀ base' : ''}`;
     ctx.fillText(label, 4, yStart + 2);
 
     const bandTop = yStart + LABEL_HEIGHT;
