@@ -28,6 +28,7 @@ export default function App() {
   } | null>(null);
   const [processing, setProcessing] = useState(false);
   const [flipForPrint, setFlipForPrint] = useState(true);
+  const [cropMarks, setCropMarks] = useState(true);
   const generateId = useRef(0);
   const defaultsLoaded = useRef(false);
 
@@ -154,6 +155,8 @@ export default function App() {
             printWidth={printWidth}
             flipForPrint={flipForPrint}
             onFlipChange={setFlipForPrint}
+            cropMarks={cropMarks}
+            onCropMarksChange={setCropMarks}
           />
         )}
       </main>

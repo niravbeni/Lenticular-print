@@ -10,6 +10,8 @@ interface Props {
   printWidth: number;
   flipForPrint: boolean;
   onFlipChange: (v: boolean) => void;
+  cropMarks: boolean;
+  onCropMarksChange: (v: boolean) => void;
 }
 
 export default function ExportButtons({
@@ -20,6 +22,8 @@ export default function ExportButtons({
   printWidth,
   flipForPrint,
   onFlipChange,
+  cropMarks,
+  onCropMarksChange,
 }: Props) {
   const [exporting, setExporting] = useState<'png' | 'tiff' | 'cal' | null>(null);
 
@@ -28,9 +32,9 @@ export default function ExportButtons({
     setExporting(format);
     try {
       if (format === 'png') {
-        await exportPng(imageData, dpi, lpi, frameCount, flipForPrint);
+        await exportPng(imageData, dpi, lpi, frameCount, flipForPrint, cropMarks);
       } else {
-        await exportTiff(imageData, dpi, lpi, frameCount, flipForPrint);
+        await exportTiff(imageData, dpi, lpi, frameCount, flipForPrint, cropMarks);
       }
     } catch (e) {
       console.error('Export failed:', e);
@@ -81,17 +85,30 @@ export default function ExportButtons({
           </button>
         </div>
 
-        <label className="flex items-center gap-2 cursor-pointer select-none">
-          <input
-            type="checkbox"
-            checked={flipForPrint}
-            onChange={(e) => onFlipChange(e.target.checked)}
-            className="w-4 h-4 rounded border-border accent-accent"
-          />
-          <span className="text-sm text-text-secondary">
-            Mirror for back-printing
-          </span>
-        </label>
+        <div className="flex flex-col sm:flex-row gap-2 sm:gap-4">
+          <label className="flex items-center gap-2 cursor-pointer select-none">
+            <input
+              type="checkbox"
+              checked={flipForPrint}
+              onChange={(e) => onFlipChange(e.target.checked)}
+              className="w-4 h-4 rounded border-border accent-accent"
+            />
+            <span className="text-sm text-text-secondary">
+              Mirror for back-printing
+            </span>
+          </label>
+          <label className="flex items-center gap-2 cursor-pointer select-none">
+            <input
+              type="checkbox"
+              checked={cropMarks}
+              onChange={(e) => onCropMarksChange(e.target.checked)}
+              className="w-4 h-4 rounded border-border accent-accent"
+            />
+            <span className="text-sm text-text-secondary">
+              Crop marks &amp; margins
+            </span>
+          </label>
+        </div>
       </div>
 
       <button
