@@ -77,8 +77,6 @@ export default function SettingsPanel({
   const lensPitch = dpi / lpi;
   const printWidthInches = imageWidth ? imageWidth / dpi : null;
   const printHeightInches = imageHeight ? imageHeight / dpi : null;
-  const isIntegerStrip = frameCount > 0 && Number.isInteger(stripWidth);
-
   return (
     <div className="flex flex-col gap-3 min-w-0">
       <div className="flex gap-3">
@@ -96,20 +94,17 @@ export default function SettingsPanel({
         />
       </div>
 
-      {/* Computed info — compact inline row */}
       {frameCount > 0 && (
         <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-text-tertiary">
           <span>
             Pitch:{' '}
             <span className="text-text-secondary font-mono">
-              {lensPitch.toFixed(1)}px
+              {lensPitch.toFixed(2)}px
             </span>
           </span>
           <span>
             Strip:{' '}
-            <span
-              className={`font-mono ${isIntegerStrip ? 'text-success' : 'text-warning'}`}
-            >
+            <span className="text-text-secondary font-mono">
               {stripWidth.toFixed(2)}px
             </span>
           </span>
@@ -126,12 +121,6 @@ export default function SettingsPanel({
             </span>
           )}
         </div>
-      )}
-
-      {!isIntegerStrip && frameCount > 0 && (
-        <p className="text-xs text-warning leading-snug">
-          Non-integer strip width. Adjust DPI or LPI for best results.
-        </p>
       )}
     </div>
   );
