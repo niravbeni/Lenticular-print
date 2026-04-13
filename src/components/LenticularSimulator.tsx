@@ -7,6 +7,8 @@ import { vertexShader, fragmentShader } from '../lib/lenticularShader';
 interface Props {
   images: LoadedImage[];
   lpi: number;
+  printWidth: number;
+  printHeight: number;
 }
 
 function imageToTexture(image: LoadedImage): THREE.Texture {
@@ -31,10 +33,14 @@ const MAX_TILT = Math.PI / 6; // 30 degrees
 function LenticularCard({
   images,
   lpi,
+  printWidth,
+  printHeight,
   tiltAngle,
 }: {
   images: LoadedImage[];
   lpi: number;
+  printWidth: number;
+  printHeight: number;
   tiltAngle: number;
 }) {
   const meshRef = useRef<THREE.Mesh>(null);
@@ -52,14 +58,11 @@ function LenticularCard({
     };
   }, [textures]);
 
-  const aspect = images.length > 0 ? images[0].width / images[0].height : 4 / 3;
+  const aspect = printWidth / printHeight;
   const cardHeight = 2.4;
   const cardWidth = cardHeight * aspect;
 
-  // Lens count: how many lenses fit across the physical width of the card
-  // We use an arbitrary physical scale (cardWidth maps to ~6 inches)
-  const physicalWidthInches = 6;
-  const lensCount = physicalWidthInches * lpi;
+  const lensCount = printWidth * lpi;
 
   const uniforms = useMemo(() => {
     const u: Record<string, THREE.IUniform> = {
@@ -118,7 +121,7 @@ function LenticularCard({
   );
 }
 
-export default function LenticularSimulator({ images, lpi }: Props) {
+export default function LenticularSimulator({ images, lpi, printWidth, printHeight }: Props) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [tiltAngle, setTiltAngle] = useState(0);
   const dragging = useRef(false);
@@ -180,7 +183,7 @@ export default function LenticularSimulator({ images, lpi }: Props) {
         >
           <ambientLight intensity={0.6} />
           <directionalLight position={[2, 3, 4]} intensity={0.8} />
-          <LenticularCard images={images} lpi={lpi} tiltAngle={tiltAngle} />
+          <LenticularCard images={images} lpi={lpi} printWidth={printWidth} printHeight={printHeight} tiltAngle={tiltAngle} />
         </Canvas>
       </div>
     </div>

@@ -27,6 +27,7 @@ export default function App() {
     stripWidth: number;
   } | null>(null);
   const [processing, setProcessing] = useState(false);
+  const [flipForPrint, setFlipForPrint] = useState(true);
   const generateId = useRef(0);
   const defaultsLoaded = useRef(false);
 
@@ -137,7 +138,7 @@ export default function App() {
                   </div>
                 }
               >
-                <LenticularSimulator images={images} lpi={lpi} />
+                <LenticularSimulator images={images} lpi={lpi} printWidth={printWidth} printHeight={printHeight} />
               </Suspense>
             </div>
           )}
@@ -150,6 +151,9 @@ export default function App() {
             dpi={dpi}
             lpi={lpi}
             frameCount={images.length}
+            printWidth={printWidth}
+            flipForPrint={flipForPrint}
+            onFlipChange={setFlipForPrint}
           />
         )}
       </main>
